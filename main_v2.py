@@ -18,7 +18,7 @@ print(weights)
 curr_weights = deepcopy(weights)
 next_weight_server = 0
 # Server processing time, time per packet
-processing_time = 0.004
+# processing_time = 0.004
 
 #value for powers of x choices
 powers_of_x_value = 3
@@ -29,6 +29,7 @@ heapq.heapify(heap)
 LOAD_BALANCER_DROPS = False
 assignment_methods = ["RandomAssignment", "ConsistentHashing", "PowersOfTwoNoMemory", "PowersOfTwoWithMemory", 
 "PowersOfXWithMemory", "RoundRobin", "WeightedRoundRobin", "Heaps"]
+assignment_methods = ["Heaps"]
 powers_of_x = [2, 4, 8]
 
 #class defining a client/host
@@ -160,10 +161,9 @@ class Server:
 			if TTF > 0:
 				TTF -= (packet_i.time_sent - t)
 				if TTF < 0:
-					# That means it processed, no waiting in the queue, so this is a processed request
-					#count += 1, final time & capture the throughput
+					#print("made zerooooooo")
 					TTF = 0
-			TTF += processing_time
+			TTF += packet_i.processing_time
 			t = packet_i.time_sent
 			i += 1
 		TTF -= (current_time - t)
@@ -184,6 +184,7 @@ class Packet:
 		self.clientid = clientid
 		self.port_num = port_number
 		self.time_sent = time_sent
+		self.processing_time = random.uniform(0.001, 0.1)
 
 	def __repr__(self):
 		return "Packet from client: " + str(self.clientid) + "at port: " + str(self.port_num) +  " @time: " + str(round(self.time_sent,3))
@@ -205,6 +206,7 @@ def run_load_plotter(servers, assignment_method):
 		plt.xlabel('Time')
 		plt.ylabel('Load (Time til finish)')
 		plt.title('Load vs. Time for Servers')
+		#plt.axis([0, 1, 0, 0.6])
 
 	plt.savefig('plots/SmallSystemWithFlows/' + assignment_method + '/LoadVsTimeForServers.png')
 	plt.clf()
@@ -245,6 +247,7 @@ def run_consistency_check(servers):
 			if server.id != otherServer.id:
 				for packet in server.packet_history:
 					if (packet.clientid, packet.port_num) in [(pckt.clientid, pckt.port_num) for pckt in otherServer.packet_history]:
+						#print(packet.clientid, " and ", packet.port_num)
 						perFlowConsistent = False
 						break
 
@@ -283,7 +286,6 @@ def run_simulation(assignment_method):
 		server = Server(i)
 		servers.append(server)
 
-	#current_time = 0
 	# Main Simulation Processing Loop
 	for i in range(len(packets)):
 		packet = packets[i]
@@ -299,7 +301,7 @@ def run_simulation(assignment_method):
 		load_balancer = load_balancers[lb_id]
 		if assignment_method == "Heaps":
 			current_workload, current_worker = heapq.heappop(heap)
-			new_workload = current_workload + processing_time
+			new_workload = current_workload + packet.processing_time
 			heapq.heappush(heap, (new_workload, current_worker))
 			server = servers[current_worker]
 			server.add_packet(packet)
@@ -318,7 +320,6 @@ def run_simulation(assignment_method):
 
 			server = servers[server_id]
 			server.add_packet(packet)
-		#current_time += processing_time
 		
 
 	run_load_plotter(servers, assignment_method)
