@@ -26,7 +26,8 @@ powers_of_x_value = 3
 
 #whether or not a load balancer drops
 LOAD_BALANCER_DROPS = False
-assignment_methods = ["RandomAssignment", "ConsistentHashing", "PowersOfTwoNoMemory", "PowersOfTwoWithMemory", "PowersOfXWithMemory", "RoundRobin", "WeightedRoundRobin"]
+assignment_methods = ["RandomAssignment", "ConsistentHashing", "PowersOfTwoNoMemory", "PowersOfTwoWithMemory", 
+"PowersOfXWithMemory", "RoundRobin", "WeightedRoundRobin"]
 powers_of_x = [2, 4, 8]
 
 #class defining a client/host
