@@ -137,6 +137,8 @@ class Server:
 	def __init__(self, address):
 		self.id = address
 		self.packet_history = []
+		self.last_time=0
+		self.throughput_rate=0
 
 	def add_packet(self, packet):
 		self.packet_history.append(packet)
@@ -151,6 +153,7 @@ class Server:
 		TTF = 0
 		t = 0
 		i = 0
+		count=0
 		while t < current_time:
 			if i >= len(self.packet_history):
 				break
@@ -161,7 +164,7 @@ class Server:
 				TTF -= (packet_i.time_sent - t)
 				if TTF < 0:
 					# That means it processed, no waiting in the queue, so this is a processed request
-					#count += 1, final time & capture the throughput
+					count += 1
 					TTF = 0
 			TTF += processing_time
 			t = packet_i.time_sent
@@ -169,6 +172,12 @@ class Server:
 		TTF -= (current_time - t)
 		if TTF < 0:
 			TTF = 0
+
+		#calculating the throughput rate
+		time_elapsed=current_time-self.last_time
+		self.throughput_rate=count/time_elapsed if time_elapsed>0 else 0
+		self.last_time=current_time
+
 		return TTF
 		#return len(self.packet_history)*processing_time
 
@@ -237,6 +246,25 @@ def run_mean_and_stdev_plotter(servers, assignment_method):
 
 	plt.savefig('plots/SmallSystemWithFlows/' + assignment_method + '/MeanAndStdevLoadVsTimeForServers.png')
 	plt.clf()
+	
+def run_throughput_plotter(servers, assignment_method):
+    for server in servers:
+        times = []
+        throughputs = []  # initialize list to store throughput values
+        for t in [x / 250 for x in range(1, 250)]:
+            load = server.get_load(t)
+            throughput = server.throughput_rate  # get the throughput rate from the server object
+            times.append(t)
+            throughputs.append(throughput)  # add the throughput rate to the lis
+	
+        plt.plot(np.array([x for x in times]), np.array([y for y in throughputs]), label=str("Server" + str(server.id)) + ' Throughput')
+        plt.legend(loc="best")
+        plt.xlabel('Time')
+        plt.ylabel(' Throughput')
+        plt.title('Throughput vs. Time for Servers')
+
+    plt.savefig('plots/SmallSystemWithFlows/' + assignment_method + '/ThroughputVsTimeForServers.png')
+    plt.clf()
 
 def run_consistency_check(servers):
 	perFlowConsistent = True
@@ -323,6 +351,9 @@ def run_simulation(assignment_method):
 
 	run_load_plotter(servers, assignment_method)
 	run_mean_and_stdev_plotter(servers, assignment_method)
+	run_throughput_plotter(servers, assignment_method)
+
+	
 	run_consistency_check(servers)
 	print()
 
