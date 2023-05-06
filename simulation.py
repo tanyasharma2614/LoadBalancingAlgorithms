@@ -1,43 +1,29 @@
 import random
-import matplotlib.pyplot as plt
-import numpy as np
 from copy import deepcopy
 import heapq
-# Packet generation variables
+import numpy as np
+
+from packet import Packet
+from server import Server
+from plotting import * 
 num_flows = 150
 mean_flow_size = 15
 flow_size_stdev = 2
 max_flow_duration = 0.05
-# Num clients, load balancers, servers
 num_clients = 50
-num_load_balancers = 2
+num_load_balancers = 4
 num_servers = 5
+LOAD_BALANCER_DROPS = False
+heap = [(0, server) for server in range(num_servers)]
+powers_of_x = [2, 4, 8]
+powers_of_x_value = 3
+heapq.heapify(heap)
 next_server = 0
 weights = [random.randint(1, 10) for _ in range(num_servers)]
-print(weights)
+print(weights, "are the server weights")
 curr_weights = deepcopy(weights)
 next_weight_server = 0
-# Server processing time, time per packet
-# processing_time = 0.004
 
-#value for powers of x choices
-powers_of_x_value = 3
-heap = [(0, server) for server in range(num_servers)]
-heapq.heapify(heap)
-
-#whether or not a load balancer drops
-LOAD_BALANCER_DROPS = False
-assignment_methods = ["RandomAssignment", "ConsistentHashing", "PowersOfTwoNoMemory", "PowersOfTwoWithMemory", 
-"PowersOfXWithMemory", "RoundRobin", "WeightedRoundRobin", "Heaps"]
-assignment_methods = ["Heaps"]
-powers_of_x = [2, 4, 8]
-
-#class defining a client/host
-class Client:
-	def __init__(self, address):
-		self.id = address
-
-#class defining the load balancer
 class LoadBalancer:
 	def __init__(self, address):
 		self.id = address
@@ -131,135 +117,10 @@ class LoadBalancer:
 		return min_server_num
 
 	def __repr__(self):
-		return "Load Balancer id: " + str(self.id)	
+		return "Load Balancer id: " + str(self.id)
 
-#class defining a backend server clients are making requests to 
-class Server:
-	def __init__(self, address):
-		self.id = address
-		self.packet_history = []
-
-	def add_packet(self, packet):
-		self.packet_history.append(packet)
-
-	def clear_packets(self):
-		self.packet_history.clear()
-
-	#calculate the amount of time until the queue is theoretically free
-	def get_load(self, current_time):
-		if len(self.packet_history) == 0:
-			return 0
-		TTF = 0
-		t = 0
-		i = 0
-		while t < current_time:
-			if i >= len(self.packet_history):
-				break
-			packet_i = self.packet_history[i]
-			if packet_i.time_sent > current_time:
-				break
-			if TTF > 0:
-				TTF -= (packet_i.time_sent - t)
-				if TTF < 0:
-					#print("made zerooooooo")
-					TTF = 0
-			TTF += packet_i.processing_time
-			t = packet_i.time_sent
-			i += 1
-		TTF -= (current_time - t)
-		if TTF < 0:
-			TTF = 0
-		return TTF
-		#return len(self.packet_history)*processing_time
-
-	def __repr__(self):
-		string = ""
-		for packet in self.packet_history:
-			string += str(round(packet.time_sent,3)) + " "
-		return "Server id: " + str(self.id) +"\n" + "Packet arrival times: " + string
-
-#class defining a packet
-class Packet:
-	def __init__(self, clientid, port_number,time_sent):
-		self.clientid = clientid
-		self.port_num = port_number
-		self.time_sent = time_sent
-		self.processing_time = random.uniform(0.001, 0.1)
-
-	def __repr__(self):
-		return "Packet from client: " + str(self.clientid) + "at port: " + str(self.port_num) +  " @time: " + str(round(self.time_sent,3))
-
-def run_load_plotter(servers, assignment_method):
-	# Post-Simulation Analysis
-	for server in servers:
-		#print(server)
-		times = []
-		loads = []
-		for t in [x/250 for x in range(1, 250)]:
-			load = server.get_load(t)
-			# print("Load at time", t, "is", round(load, 3))
-			times.append(t)
-			loads.append(load)
-
-		plt.plot(np.array([x for x in times]), np.array([y for y in loads]), label=str("Server" + str(server.id))) # , s=5
-		plt.legend(loc="best")
-		plt.xlabel('Time')
-		plt.ylabel('Load (Time til finish)')
-		plt.title('Load vs. Time for Servers')
-		#plt.axis([0, 1, 0, 0.6])
-
-	plt.savefig('plots/SmallSystemWithFlows/' + assignment_method + '/LoadVsTimeForServers.png')
-	plt.clf()
-
-def run_mean_and_stdev_plotter(servers, assignment_method):
-	times = []
-	means = []
-	stdevs = []
-	for t in [x/250 for x in range(1, 250)]:
-		times.append(t)
-		mean = sum([x.get_load(t) for x in servers]) / len(servers)
-		stdev = pow( sum([((x.get_load(t) - mean) ** 2) for x in servers]) / (len(servers) - 1), 1/2)
-		means.append(mean)
-		stdevs.append(stdev)
-		
-	plt.plot(np.array([x for x in times]), np.array([y for y in means]), label="mean")
-	plt.plot(np.array([x for x in times]), np.array([y for y in stdevs]), label="stdev")
-
-	avg_mean = sum(means)/len(means)
-	avg_stdev = sum(stdevs)/len(stdevs)
-
-	print("Mean load: %5.3f" % avg_mean)
-	print("Mean standard deviation: %5.3f" % avg_stdev)
-
-	plt.legend(loc="best")
-	plt.xlabel('Time')
-	plt.ylabel('Mean / stdev server load')
-	plt.title('Mean and Stdev of Load vs. Time for Servers')
-	plt.axis([0, 1, 0, 0.6])
-
-	plt.savefig('plots/SmallSystemWithFlows/' + assignment_method + '/MeanAndStdevLoadVsTimeForServers.png')
-	plt.clf()
-
-def run_consistency_check(servers):
-	perFlowConsistent = True
-	for server in servers:
-		for otherServer in servers:
-			if server.id != otherServer.id:
-				for packet in server.packet_history:
-					if (packet.clientid, packet.port_num) in [(pckt.clientid, pckt.port_num) for pckt in otherServer.packet_history]:
-						#print(packet.clientid, " and ", packet.port_num)
-						perFlowConsistent = False
-						break
-
-	if perFlowConsistent:
-		print("Per-Flow Consistency Maintained")
-	else:
-		print("Per-Flow Consistency Not Maintained")
-
-
-server_list = []
 def run_simulation(assignment_method):
-	print("running simulation for " + assignment_method)
+	print("running simulation for ", assignment_method)
 
 	# Initialization Steps
 	packets = []
@@ -286,6 +147,7 @@ def run_simulation(assignment_method):
 		server = Server(i)
 		servers.append(server)
 
+	#current_time = 0
 	# Main Simulation Processing Loop
 	for i in range(len(packets)):
 		packet = packets[i]
@@ -324,8 +186,9 @@ def run_simulation(assignment_method):
 
 	run_load_plotter(servers, assignment_method)
 	run_mean_and_stdev_plotter(servers, assignment_method)
-	run_consistency_check(servers)
-	print()
+	run_throughput_plotter(servers, assignment_method)
+	run_response_time_plotter(servers,assignment_method)
 
-for method in assignment_methods:
-	run_simulation(method)
+	
+	run_consistency_check(servers)
+	print("**********************************************************************")
