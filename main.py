@@ -142,6 +142,7 @@ class Server:
 
 	def add_packet(self, packet):
 		self.packet_history.append(packet)
+		# packet.end_time=current_time
 
 	def clear_packets(self):
 		self.packet_history.clear()
@@ -193,7 +194,8 @@ class Packet:
 		self.clientid = clientid
 		self.port_num = port_number
 		self.time_sent = time_sent
-
+		# self.end_time=time_sent
+		
 	def __repr__(self):
 		return "Packet from client: " + str(self.clientid) + "at port: " + str(self.port_num) +  " @time: " + str(round(self.time_sent,3))
 
@@ -217,6 +219,28 @@ def run_load_plotter(servers, assignment_method):
 
 	plt.savefig('plots/SmallSystemWithFlows/' + assignment_method + '/LoadVsTimeForServers.png')
 	plt.clf()
+
+# def run_response_time_plotter(servers, assignment_method):
+#     for server in servers:
+#         times = []
+#         response_times = []
+#         for t in [x / 250 for x in range(1, 250)]:
+#             times.append(t)
+#             response_times_t = []
+#             for packet in server.packet_history:
+#                 if packet.end_time <= t:
+#                     response_times_t.append(packet.end_time - packet.time_sent)
+#             if len(response_times_t) > 0:
+#                 response_times.append(sum(response_times_t) / len(response_times_t))
+#             else:
+#                 response_times.append(0)
+#         plt.plot(times, response_times, label=f"Server {server.id}")
+#     plt.legend(loc="best")
+#     plt.xlabel('Time')
+#     plt.ylabel('Response Time')
+#     plt.title('Response Time vs. Time for Servers')
+#     plt.savefig(f'plots/SmallSystemWithFlows/{assignment_method}/ResponseTimeVsTimeForServers.png')
+#     plt.clf()
 
 def run_mean_and_stdev_plotter(servers, assignment_method):
 	times = []
@@ -352,6 +376,7 @@ def run_simulation(assignment_method):
 	run_load_plotter(servers, assignment_method)
 	run_mean_and_stdev_plotter(servers, assignment_method)
 	run_throughput_plotter(servers, assignment_method)
+	# run_response_time_plotter(servers,assignment_method)
 
 	
 	run_consistency_check(servers)
