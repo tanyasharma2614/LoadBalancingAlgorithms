@@ -10,7 +10,7 @@ def run_load_plotter(servers, lb_strategy, system_type):
 			times.append(t)
 			loads.append(load)
 
-		plt.plot(np.array([x for x in times]), np.array([y for y in loads]), label=str("Server" + str(server.id))) # , s=5
+		plt.plot(np.array([x for x in times]), np.array([y for y in loads]), label=str("Server" + str(server.id)))
 		plt.legend(loc="best")
 		plt.xlabel('Time')
 		plt.ylabel('Load (Time to finish)')
