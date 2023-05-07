@@ -13,7 +13,7 @@ def loadVStime(servers, lb_strategy, system_type):
     ax.legend(loc="best")
     ax.set_xlabel('Time')
     ax.set_ylabel('Load (Time to finish)')
-    ax.set_title('Load vs. Time for Servers')
+    ax.set_title('Load vs. Time for Servers:'+lb_strategy)
 
     fig.savefig(f'plots/{system_type}/{lb_strategy}/LoadVsTimeForServers.png')
     plt.close(fig)
@@ -32,7 +32,7 @@ def responsetimeVStime(servers, lb_strategy, system_type):
     ax.legend(loc="best")
     ax.set_xlabel('Time')
     ax.set_ylabel('Response Time')
-    ax.set_title('Response Time vs. Time for Servers')
+    ax.set_title('Response Time vs. Time for Servers:'+lb_strategy)
     fig.savefig('plots/{}/{}/ResponseTimeVsTimeForServers.png'.format(system_type, lb_strategy))
     plt.clf()
 
@@ -60,7 +60,7 @@ def meanstdVStime(servers, lb_strategy, system_type):
     plt.legend(loc="upper right")  # specify location of legend
     plt.xlabel('Time')
     plt.ylabel('Mean / stdev server load')
-    plt.title('Mean and Stdev of Load vs. Time for Servers')
+    plt.title('Mean and Stdev of Load vs. Time for Servers:'+lb_strategy)
     plt.axis([0, 1, 0, 0.6])
 
     plt.savefig('plots/{}/{}/MeanAndStdevLoadVsTimeForServers.png'.format(system_type, lb_strategy))
@@ -81,7 +81,7 @@ def throughputVStime(servers, lb_strategy, system_type):
         plt.legend(loc="best")
         plt.xlabel('Time')
         plt.ylabel(' Throughput')
-        plt.title('Throughput vs. Time for Servers')
+        plt.title('Throughput vs. Time for Servers:'+lb_strategy)
 
     plt.savefig('plots/{}/{}/ThroughputVsTimeForServers.png'.format(system_type, lb_strategy))
     plt.clf()
@@ -103,7 +103,7 @@ def throughputVStime(servers, lb_strategy, system_type):
     ax.legend() # update legend
     ax.set_xlabel('Time')
     ax.set_ylabel('Throughput')
-    ax.set_title('Throughput vs. Time for Servers')
+    ax.set_title('Throughput vs. Time for Servers:'+lb_strategy)
 
     fig.savefig('plots/{}/{}/ThroughputVsTimeForServers.png'.format(system_type, lb_strategy))
     plt.clf()
