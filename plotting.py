@@ -1,14 +1,14 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
+
 def loadVStime(servers, lb_strategy, system_type):
     fig, ax = plt.subplots()
 
     for server in servers:
         times = np.linspace(0, 1, 500)
         loads = np.array([server.get_load(t) for t in times])
-        ax.plot(times, loads, label=f"Server {server.id}", linestyle='--', linewidth=2*(server.id + 1))
-        #plt.plot(np.array([x for x in times]), np.array([y for y in loads]), label=str("Server" + str(server.id)), linestyle='--', linewidth=2*(server.id + 1))
+        ax.plot(times, loads, label=f"Server {server.id}")
 
     ax.legend(loc="best")
     ax.set_xlabel('Time')
@@ -34,6 +34,56 @@ def responsetimeVStime(servers, lb_strategy, system_type):
     ax.set_ylabel('Response Time')
     ax.set_title('Response Time vs. Time for Servers')
     fig.savefig('plots/{}/{}/ResponseTimeVsTimeForServers.png'.format(system_type, lb_strategy))
+    plt.clf()
+
+
+def meanstdVStime(servers, lb_strategy, system_type):
+    times = []
+    means = []
+    stdevs = []
+    for t in [x/500 for x in range(1, 500)]:
+        times.append(t)
+        mean = sum([x.get_load(t) for x in servers]) / len(servers)
+        stdev = pow( sum([((x.get_load(t) - mean) ** 2) for x in servers]) / (len(servers) - 1), 1/2)
+        means.append(mean)
+        stdevs.append(stdev)
+
+    plt.plot(np.array([x for x in times]), np.array([y for y in means]), label="mean")
+    plt.plot(np.array([x for x in times]), np.array([y for y in stdevs]), label="stdev")
+
+    avg_mean = sum(means)/len(means)
+    avg_stdev = sum(stdevs)/len(stdevs)
+
+    print("Mean load: %5.3f" % avg_mean)
+    print("Mean standard deviation: %5.3f" % avg_stdev)
+
+    plt.legend(loc="upper right")  # specify location of legend
+    plt.xlabel('Time')
+    plt.ylabel('Mean / stdev server load')
+    plt.title('Mean and Stdev of Load vs. Time for Servers')
+    plt.axis([0, 1, 0, 0.6])
+
+    plt.savefig('plots/{}/{}/MeanAndStdevLoadVsTimeForServers.png'.format(system_type, lb_strategy))
+    plt.clf()
+
+	
+def throughputVStime(servers, lb_strategy, system_type):
+    for server in servers:
+        times = []
+        throughputs = []  # initialize list to store throughput values
+        for t in [x / 500 for x in range(1, 500)]:
+            load = server.get_load(t)
+            throughput = server.throughput_rate  # get the throughput rate from the server object
+            times.append(t)
+            throughputs.append(throughput)  # add the throughput rate to the lis
+	
+        plt.plot(np.array([x for x in times]), np.array([y for y in throughputs]), label=str("Server" + str(server.id)) + ' Throughput')
+        plt.legend(loc="best")
+        plt.xlabel('Time')
+        plt.ylabel(' Throughput')
+        plt.title('Throughput vs. Time for Servers')
+
+    plt.savefig('plots/{}/{}/ThroughputVsTimeForServers.png'.format(system_type, lb_strategy))
     plt.clf()
 
 def throughputVStime(servers, lb_strategy, system_type):
