@@ -1,14 +1,13 @@
-# LoadBalancerSimulator
+Load Balancing Algorithms
 
-A program that simulates packets being sent from clients through load-balancers to servers, allowing the testing of various load balancing techniques. 
+Our goal is to assess and evaluate various load balancing techniques by measuring their performance based on relevant performance metrics. Typically, Load Balancing is accomplished through conventional techniques such as round-robin, random, and weighted round-robin. However, in this particular project, we aim to introduce a novel approach by utilizing heaps to achieve Load Balancing in a Network.
 
-# Quickstart Instructions
+Instructions:
 
-To pull the codebase from github and run the simulation, <br/>
-<code>git clone https://github.com/AKlyuev/LoadBalancerSimulator.git</code> <br/>
-<code>cd LoadBalancerSimulator/ </code> <br/>
-<code>python3 main.py </code> <br/>
+git clone https://github.com/tanyasharma2614/DIS-Final-Project.git
+cd FinalProject
+python3 main.py
 
-Simulation parameters can be changed by editing the file <code>main.py</code>.</i> <br/>
+Additional Information:
 
-Plots output by the simulation be viewed in the <code>plots/</code> directory.
+Resultant plots can be viewed in the plots directory.
