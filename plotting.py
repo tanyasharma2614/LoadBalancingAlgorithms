@@ -1,28 +1,25 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-def run_load_plotter(servers, assignment_method):
-	# Post-Simulation Analysis
+def run_load_plotter(servers, lb_strategy, system_type):
 	for server in servers:
-		#print(server)
 		times = []
 		loads = []
 		for t in [x/250 for x in range(1, 250)]:
 			load = server.get_load(t)
-			# print("Load at time", t, "is", round(load, 3))
 			times.append(t)
 			loads.append(load)
 
 		plt.plot(np.array([x for x in times]), np.array([y for y in loads]), label=str("Server" + str(server.id))) # , s=5
 		plt.legend(loc="best")
 		plt.xlabel('Time')
-		plt.ylabel('Load (Time til finish)')
+		plt.ylabel('Load (Time to finish)')
 		plt.title('Load vs. Time for Servers')
 
-	plt.savefig('plots/SmallSystemWithFlows/' + assignment_method + '/LoadVsTimeForServers.png')
+	plt.savefig('plots/{}/{}/LoadVsTimeForServers.png'.format(system_type, lb_strategy))
 	plt.clf()
 
-def run_response_time_plotter(servers, assignment_method):
+def run_response_time_plotter(servers, lb_strategy, system_type):
     for server in servers:
         times = []
         response_times = []
@@ -31,7 +28,7 @@ def run_response_time_plotter(servers, assignment_method):
             response_times_t = []
             for packet in server.packet_history:
                 if packet.end_time <= t:
-                    response_times_t.append(packet.end_time - packet.time_sent)
+                    response_times_t.append(packet.end_time - packet.start_time)
             if len(response_times_t) > 0:
                 response_times.append(sum(response_times_t) / len(response_times_t))
             else:
@@ -41,10 +38,10 @@ def run_response_time_plotter(servers, assignment_method):
     plt.xlabel('Time')
     plt.ylabel('Response Time')
     plt.title('Response Time vs. Time for Servers')
-    plt.savefig(f'plots/SmallSystemWithFlows/{assignment_method}/ResponseTimeVsTimeForServers.png')
+    plt.savefig('plots/{}/{}/ResponseTimeVsTimeForServers.png'.format(system_type, lb_strategy))
     plt.clf()
 
-def run_mean_and_stdev_plotter(servers, assignment_method):
+def run_mean_and_stdev_plotter(servers, lb_strategy, system_type):
 	times = []
 	means = []
 	stdevs = []
@@ -70,10 +67,10 @@ def run_mean_and_stdev_plotter(servers, assignment_method):
 	plt.title('Mean and Stdev of Load vs. Time for Servers')
 	plt.axis([0, 1, 0, 0.6])
 
-	plt.savefig('plots/SmallSystemWithFlows/' + assignment_method + '/MeanAndStdevLoadVsTimeForServers.png')
+	plt.savefig('plots/{}/{}/MeanAndStdevLoadVsTimeForServers.png'.format(system_type, lb_strategy))
 	plt.clf()
 	
-def run_throughput_plotter(servers, assignment_method):
+def run_throughput_plotter(servers, lb_strategy, system_type):
     for server in servers:
         times = []
         throughputs = []  # initialize list to store throughput values
@@ -89,7 +86,7 @@ def run_throughput_plotter(servers, assignment_method):
         plt.ylabel(' Throughput')
         plt.title('Throughput vs. Time for Servers')
 
-    plt.savefig('plots/SmallSystemWithFlows/' + assignment_method + '/ThroughputVsTimeForServers.png')
+    plt.savefig('plots/{}/{}/ThroughputVsTimeForServers.png'.format(system_type, lb_strategy))
     plt.clf()
 
 def run_consistency_check(servers):
@@ -98,7 +95,7 @@ def run_consistency_check(servers):
 		for otherServer in servers:
 			if server.id != otherServer.id:
 				for packet in server.packet_history:
-					if (packet.clientid, packet.port_num) in [(pckt.clientid, pckt.port_num) for pckt in otherServer.packet_history]:
+					if (packet.client_id, packet.port_number) in [(pckt.client_id, pckt.port_number) for pckt in otherServer.packet_history]:
 						perFlowConsistent = False
 						break
 
