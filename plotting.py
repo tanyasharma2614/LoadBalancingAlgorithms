@@ -8,7 +8,7 @@ def loadVStime(servers, lb_strategy, system_type):
     for server in servers:
         times = np.linspace(0, 1, 500)
         loads = np.array([server.get_load(t) for t in times])
-        ax.plot(times, loads, label=f"Server {server.id}", linestyle='--', linewidth=2*(server.id + 1))
+        ax.plot(times, loads, label=f"Server {server.id}")
 
     ax.legend(loc="best")
     ax.set_xlabel('Time')
@@ -85,8 +85,6 @@ def throughputVStime(servers, lb_strategy, system_type):
 
     plt.savefig('plots/{}/{}/ThroughputVsTimeForServers_{}.png'.format(system_type, lb_strategy, lb_strategy))
     plt.clf()
-
-
 
 def consistencycheck(servers):
 	perFlowConsistent = True
