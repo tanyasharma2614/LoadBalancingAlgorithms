@@ -4,9 +4,9 @@ Our goal is to assess and evaluate various load balancing techniques by measurin
 
 Instructions:
 
-git clone https://github.com/tanyasharma2614/DIS-Final-Project.git
-cd FinalProject
-python3 main.py
+git clone https://github.com/tanyasharma2614/DIS-Final-Project.git  
+cd FinalProject  
+python3 main.py  
 
 Additional Information:
 
